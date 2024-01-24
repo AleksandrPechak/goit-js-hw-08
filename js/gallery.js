@@ -64,46 +64,51 @@ const images = [
   },
 ];
 
-const gallery = document.querySelector(".gallery");
-let lightbox;
-gallery.addEventListener("click", (event) => {
+const imageGallery = document.querySelector(".gallery");
+let currentlightbox;
+imageGallery.addEventListener("click", (event) => {
   event.preventDefault();
+
   if (event.target.classList.contains("gallery-image")) {
-    const originalSrc = event.target.dataset.source;
-    lightbox = basicLightbox.create(
-      `<img width="1400" height="900" src="${originalSrc}">`
+    const originalSource = event.target.dataset.source;
+    currentlightbox = basicLightbox.create(
+      `<img width="1400" height="900" src="${originalSource}">`,
+      {
+        onShow: () => {
+          document.addEventListener("keydown", handleKeyDown);
+        },
+        onClose: () => {
+          document.removeEventListener("keydown", handleKeyDown);
+        },
+      }
     );
-    lightbox.show();
-    document.addEventListener("keydown", handleKeyDown);
+    currentlightbox.show();
   }
 });
 
 function handleKeyDown(event) {
-  if (event.key === "Escape" || event.code === "Escape") {
-    closeLightbox();
+  if (event.key === "Escape") {
+    closeCurrentlightbox();
   }
 }
 
-function closeLightbox() {
-  if (lightbox && lightbox.visible()) {
-    lightbox.close();
-    document.removeEventListener("keydown", handleKeyDown);
+function closeCurrentlightbox() {
+  if (currentlightbox && currentlightbox.visible()) {
+    currentlightbox.close();
   }
 }
 
-const markup = images
+const galleryMarkup = images
   .map(
-    (image) => `<li class="gallery-item">
-  <a class="gallery-link" href="${image.original}">
-    <img
-      class="gallery-image"
-      src="${image.preview}"
-      data-source="${image.original}"
-      alt="${image.description}"
-    />
+    ({ original, description, preview }) => `<li class="gallery-item">
+  <a class="gallery-link" href="${original}">
+  <img class = "gallery-image"
+  src="${preview}"
+  data-source="${original}"
+  alt="${description}"/>
   </a>
-</li>`
+  </li>`
   )
   .join("");
 
-gallery.innerHTML = markup;
+imageGallery.innerHTML = galleryMarkup
